@@ -4,6 +4,7 @@ library(readr)
 library(readxl)
 library(plotly)
 library(TTR)
+library(data.table)
 
 shinyServer(function(input, output) {
 
@@ -21,13 +22,15 @@ shinyServer(function(input, output) {
         file <- input$fileInput
         ext <- tools::file_ext(file$datapath)
         
-        req(file)
-        validate(need(ext == "txt", "Please upload a txt file"))
+        #req(file)
+        #validate(need(ext == "txt", "Please upload a txt file"))
         
-        raw_data <- read_tsv(file$datapath)
+        #raw_data <- read_tsv(file$datapath)
+        raw_data <- fread(file$datapath, skip = 2)
         
         raw_data <- raw_data %>% 
-            mutate(`J` = (`WE(1).Current (A)` * 1000000)/0.2)
+          mutate(`J` = (`V2` * 1000000)/0.07)
+            #mutate(`J` = (`WE(1).Current (A)` * 1000000)/0.2)
         
         raw_data[raw_data$J <= 15, ]
     })
@@ -39,8 +42,8 @@ shinyServer(function(input, output) {
                              counter = 0)
     
     output$distPlot <- renderPlotly({
-        plot_ly(data(), x = ~`Time (s)`, y =~J,
-                type = 'scatter', mode = 'lines', name = "data")
+        #plot_ly(data(), x = ~`Time (s)`, y =~J, type = 'scatter', mode = 'lines', name = "data")
+      plot_ly(data(), x = ~`V1`, y =~J, type = 'scatter', mode = 'lines', name = "data")
     })
     
     #output$distPlot <- renderPlotly({
@@ -52,13 +55,15 @@ shinyServer(function(input, output) {
     #})
     
     index <- eventReactive(input$actionBtn, {
-        which.min(abs(data()$`Time (s)` - strtoi(input$textInput)))
+        #which.min(abs(data()$`Time (s)` - strtoi(input$textInput)))
+      which.min(abs(data()$`V1` - strtoi(input$textInput)))
     })
     
     observeEvent(
         input$actionBtn, {
             output$contents <- renderTable({
-                values$df[values$counter, 'time'] <- data()$`Time (s)`[index()]
+                #values$df[values$counter, 'time'] <- data()$`Time (s)`[index()]
+              values$df[values$counter, 'time'] <- data()$`V1`[index()]
                 values$df[values$counter, 'J'] <- data()$J[index()]
                 values$df
             })

@@ -8,7 +8,7 @@ shinyUI(fluidPage(
 
     sidebarLayout(
         sidebarPanel(
-            fileInput("fileInput", "Choose data file:", accept = ".txt"),
+            fileInput("fileInput", "Choose data file:", accept = c(".txt", ".oxw")),
             textInput("textInput", "Time:"),
             actionButton("actionBtn", "Add J value", class = "btn-success"),
             fileInput("conInput", "Choose concentration file:"),
